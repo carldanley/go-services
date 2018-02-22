@@ -5,6 +5,9 @@ type Config struct {
 	Port     uint32
 	Username string
 	Password string
+	Database string
+
+	MonitorIntervalMilliseconds int
 
 	ReconnectEnabled              bool
 	ReconnectIntervalMilliseconds int
@@ -12,11 +15,3 @@ type Config struct {
 }
 
 type ReconnectStrategy func(svc Service) (successful bool)
-
-func DefaultReconnectionStrategy(svc Service) (successful bool) {
-	if err := svc.Connect(); err != nil {
-		return false
-	}
-
-	return true
-}

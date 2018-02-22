@@ -65,7 +65,7 @@ func (r *RabbitMQ) Connect() error {
 		r.connectionEvents = make(chan *amqp.Error, 1)
 	}
 
-	// let the connection know, we want to be informed when there are issues
+	// let the connection know we want to be informed when there are issues
 	r.connection.NotifyClose(r.connectionEvents)
 
 	// begin processing connection events
@@ -99,7 +99,6 @@ func (r *RabbitMQ) Disconnect() error {
 
 	// clean up some leftovers
 	r.connection = nil
-	r.healthy = false
 	r.reconnecting = false
 
 	// let everyone know we've disconnected
@@ -190,8 +189,18 @@ func (r *RabbitMQ) tryToReconnect() {
 	})
 
 	// try the reconnection strategy
-	successful := r.Config.ReconnectStrategy(r)
-	r.reconnecting = false
+	callback := r.Config.ReconnectStrategy
+	if callback == nil {
+		callback = func(svc Service) bool {
+			if err := svc.Connect(); err != nil {
+				return false
+			}
+
+			return true
+		}
+	}
+
+	successful := callback(r)
 
 	// if we weren't successful, attempt to reschedule things
 	if !successful && r.Config.ReconnectEnabled {
@@ -202,6 +211,9 @@ func (r *RabbitMQ) tryToReconnect() {
 		}
 
 		time.Sleep(time.Millisecond * time.Duration(interval))
+		r.reconnecting = false
 		go r.tryToReconnect()
+	} else {
+		r.reconnecting = false
 	}
 }

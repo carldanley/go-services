@@ -33,10 +33,6 @@ func (f *Factory) Register(svcType string, config Config) error {
 		return errors.New("Unrecognized service")
 	}
 
-	if config.ReconnectStrategy == nil {
-		config.ReconnectStrategy = DefaultReconnectionStrategy
-	}
-
 	service.SetConfig(config)
 	service.Subscribe(f.listenToServiceEvents)
 	f.registeredServices[svcType] = service
