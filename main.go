@@ -11,35 +11,62 @@ func main() {
 	config := pkg.Config{
 		Host: "127.0.0.1",
 		Port: 6379,
-		// Username: "guest",
-		// Password: "guest",
-		// Database: "users",
 
-		ReconnectEnabled:              true,
-		ReconnectIntervalMilliseconds: 5000,
+		ReconnectEnabled: true,
 	}
 
 	if err := factory.Register(pkg.ServiceTypeRedis, config); err != nil {
 		panic(err)
 	}
 
+	config = pkg.Config{
+		Host:     "127.0.0.1",
+		Port:     3306,
+		Username: "root",
+		Password: "root",
+		Database: "users",
+
+		ReconnectEnabled: true,
+	}
+
+	if err := factory.Register(pkg.ServiceTypeGorm, config); err != nil {
+		panic(err)
+	}
+
+	config = pkg.Config{
+		Host:     "127.0.0.1",
+		Port:     5672,
+		Username: "guest",
+		Password: "guest",
+
+		ReconnectEnabled: true,
+	}
+
+	if err := factory.Register(pkg.ServiceTypeRabbitMQ, config); err != nil {
+		panic(err)
+	}
+
 	factory.Subscribe(func(event pkg.Event) {
+		var status string
+
 		switch event.Code {
 		case pkg.ServiceUnhealthy:
-			fmt.Println("unhealthy")
+			status = "unhealthy"
 		case pkg.ServiceHealthy:
-			fmt.Println("healthy")
+			status = "healthy"
 		case pkg.ServiceConnected:
-			fmt.Println("connected")
+			status = "connected"
 		case pkg.ServiceDisconnected:
-			fmt.Println("disconnected")
+			status = "disconnected"
 		case pkg.ServiceReconnecting:
-			fmt.Println("reconnecting")
+			status = "reconnecting"
 		case pkg.ServiceReconnected:
-			fmt.Println("reconnected")
+			status = "reconnected"
 		case pkg.ServiceCouldNotConnect:
-			fmt.Println("could not connect")
+			status = "could not connect"
 		}
+
+		fmt.Printf("[%s]: %s\n", event.ServiceType, status)
 	})
 
 	if err := factory.Connect(); err != nil {

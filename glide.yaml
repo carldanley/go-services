@@ -1,2 +1,11 @@
 package: gitlab.encrypted.place/open-source/service-factory
-import: []
+import:
+- package: github.com/garyburd/redigo
+  version: ^1.5.0
+  subpackages:
+  - redis
+- package: github.com/streadway/amqp
+- package: github.com/go-sql-driver/mysql
+  version: ^1.3.0
+- package: github.com/jinzhu/gorm
+  version: ^1.0.0

@@ -66,7 +66,7 @@ func (g *Gorm) Connect() error {
 	})
 
 	// begin monitoring the database connection
-	go g.monitorDatabaseConnection()
+	go g.monitorConnection()
 
 	return nil
 }
@@ -145,7 +145,7 @@ func (g *Gorm) dispatchEvent(event Event) {
 	}
 }
 
-func (g *Gorm) monitorDatabaseConnection() {
+func (g *Gorm) monitorConnection() {
 	if g.db == nil {
 		return
 	}
@@ -164,7 +164,7 @@ func (g *Gorm) monitorDatabaseConnection() {
 		// begin trying to reconnect
 		go g.tryToReconnect()
 	} else {
-		go g.monitorDatabaseConnection()
+		go g.monitorConnection()
 	}
 }
 
