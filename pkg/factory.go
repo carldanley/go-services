@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 )
 
@@ -26,8 +25,16 @@ func (f *Factory) Register(svcType string, config Config) error {
 	switch svcType {
 	case ServiceTypeRabbitMQ:
 		service = &RabbitMQ{}
+	case ServiceTypeGorm:
+		service = &Gorm{}
+	case ServiceTypeRedis:
+		service = &Redis{}
 	default:
 		return errors.New("Unrecognized service")
+	}
+
+	if config.ReconnectStrategy == nil {
+		config.ReconnectStrategy = DefaultReconnectionStrategy
 	}
 
 	service.SetConfig(config)
@@ -106,20 +113,11 @@ func (f *Factory) GetEventStream() EventStream {
 }
 
 func (f *Factory) listenToServiceEvents(event Event) {
-	switch event.Code {
-	case ServiceUnhealthy:
-		fmt.Println("unhealthy")
-	case ServiceHealthy:
-		fmt.Println("healthy")
-	case ServiceConnected:
-		fmt.Println("connected")
-	case ServiceDisconnected:
-		fmt.Println("disconnected")
-	case ServiceReconnecting:
-		fmt.Println("reconnecting")
-	case ServiceReconnected:
-		fmt.Println("reconnected")
-	case ServiceCouldNotConnect:
-		fmt.Println("could not connect")
+	f.dispatchEvent(event)
+}
+
+func (f *Factory) dispatchEvent(event Event) {
+	for _, callback := range f.eventCallbacks {
+		callback(event)
 	}
 }
