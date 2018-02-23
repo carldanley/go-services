@@ -3,24 +3,24 @@ package main
 import (
 	"fmt"
 
-	"gitlab.encrypted.place/open-source/services/pkg"
+	"gitlab.encrypted.place/open-source/services"
 )
 
-func registerRedis(factory *pkg.Factory) {
-	config := pkg.Config{
+func registerRedis(factory *services.Factory) {
+	config := services.Config{
 		Host: "127.0.0.1",
 		Port: 6379,
 
 		ReconnectEnabled: true,
 	}
 
-	if err := factory.Register(pkg.ServiceTypeRedis, config); err != nil {
+	if err := factory.Register(services.ServiceTypeRedis, config); err != nil {
 		panic(err)
 	}
 }
 
-func registerRabbitMQ(factory *pkg.Factory) {
-	config := pkg.Config{
+func registerRabbitMQ(factory *services.Factory) {
+	config := services.Config{
 		Host:     "127.0.0.1",
 		Port:     5672,
 		Username: "guest",
@@ -29,13 +29,13 @@ func registerRabbitMQ(factory *pkg.Factory) {
 		ReconnectEnabled: true,
 	}
 
-	if err := factory.Register(pkg.ServiceTypeRabbitMQ, config); err != nil {
+	if err := factory.Register(services.ServiceTypeRabbitMQ, config); err != nil {
 		panic(err)
 	}
 }
 
-func registerGorm(factory *pkg.Factory) {
-	config := pkg.Config{
+func registerGorm(factory *services.Factory) {
+	config := services.Config{
 		Host:     "127.0.0.1",
 		Port:     3306,
 		Username: "root",
@@ -45,28 +45,28 @@ func registerGorm(factory *pkg.Factory) {
 		ReconnectEnabled: true,
 	}
 
-	if err := factory.Register(pkg.ServiceTypeGorm, config); err != nil {
+	if err := factory.Register(services.ServiceTypeGorm, config); err != nil {
 		panic(err)
 	}
 }
 
-func showEvents(event pkg.Event) {
+func showEvents(event services.Event) {
 	var status string
 
 	switch event.Code {
-	case pkg.ServiceUnhealthy:
+	case services.ServiceUnhealthy:
 		status = "unhealthy"
-	case pkg.ServiceHealthy:
+	case services.ServiceHealthy:
 		status = "healthy"
-	case pkg.ServiceConnected:
+	case services.ServiceConnected:
 		status = "connected"
-	case pkg.ServiceDisconnected:
+	case services.ServiceDisconnected:
 		status = "disconnected"
-	case pkg.ServiceReconnecting:
+	case services.ServiceReconnecting:
 		status = "reconnecting"
-	case pkg.ServiceReconnected:
+	case services.ServiceReconnected:
 		status = "reconnected"
-	case pkg.ServiceCouldNotConnect:
+	case services.ServiceCouldNotConnect:
 		status = "could not connect"
 	}
 
@@ -74,7 +74,7 @@ func showEvents(event pkg.Event) {
 }
 
 func main() {
-	factory := pkg.NewFactory()
+	factory := services.NewFactory()
 
 	registerGorm(factory)
 	registerRabbitMQ(factory)

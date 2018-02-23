@@ -1,4 +1,4 @@
-package pkg
+package services
 
 type Service interface {
 	SetConfig(Config)
