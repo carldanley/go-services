@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"gitlab.encrypted.place/open-source/services"
+	"github.com/carldanley/go-services"
 )
 
 func registerRedis(factory *services.Factory) {
