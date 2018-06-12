@@ -34,7 +34,7 @@ func (f *Factory) Register(svcType string, config Config) error {
 	}
 
 	service.SetConfig(config)
-	service.Subscribe(f.listenToServiceEvents)
+	service.Subscribe(f.dispatchEvent)
 	f.registeredServices[svcType] = service
 
 	return nil
@@ -46,7 +46,7 @@ func (f *Factory) Unregister(svcType string) error {
 		return errors.New("Service not registered")
 	}
 
-	service.Unsubscribe(f.listenToServiceEvents)
+	service.Unsubscribe(f.dispatchEvent)
 	defer service.Disconnect()
 	delete(f.registeredServices, svcType)
 	return nil
@@ -106,10 +106,6 @@ func (f *Factory) Get(svcType string) (Service, error) {
 
 func (f *Factory) GetEventStream() EventStream {
 	return f.events
-}
-
-func (f *Factory) listenToServiceEvents(event Event) {
-	f.dispatchEvent(event)
 }
 
 func (f *Factory) dispatchEvent(event Event) {
