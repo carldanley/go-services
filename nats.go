@@ -17,7 +17,6 @@ type NATS struct {
 	connected    bool
 	reconnecting bool
 
-	serviceEvents  EventStream
 	eventCallbacks []EventCallback
 	connection     *nats.Conn
 }

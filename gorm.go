@@ -18,7 +18,6 @@ type Gorm struct {
 	connected    bool
 	reconnecting bool
 
-	serviceEvents  EventStream
 	eventCallbacks []EventCallback
 
 	db *gorm.DB

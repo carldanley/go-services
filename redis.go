@@ -17,7 +17,6 @@ type Redis struct {
 	connected    bool
 	reconnecting bool
 
-	serviceEvents  EventStream
 	eventCallbacks []EventCallback
 	connection     redis.Conn
 }

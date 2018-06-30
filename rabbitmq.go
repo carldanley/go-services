@@ -18,7 +18,6 @@ type RabbitMQ struct {
 	reconnecting bool
 
 	connectionEvents chan *amqp.Error
-	serviceEvents    EventStream
 
 	connection     *amqp.Connection
 	eventCallbacks []EventCallback
