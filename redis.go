@@ -77,18 +77,18 @@ func (r *Redis) Disconnect() error {
 	r.connection = nil
 	r.reconnecting = false
 
-	// let everyone know we've disconnected
-	r.connected = false
-	r.dispatchEvent(Event{
-		ServiceType: ServiceTypeRedis,
-		Code:        ServiceDisconnected,
-	})
-
 	// let everyone know we're unhealthy
 	r.healthy = false
 	r.dispatchEvent(Event{
 		ServiceType: ServiceTypeRedis,
 		Code:        ServiceUnhealthy,
+	})
+
+	// let everyone know we've disconnected
+	r.connected = false
+	r.dispatchEvent(Event{
+		ServiceType: ServiceTypeRedis,
+		Code:        ServiceDisconnected,
 	})
 
 	return err

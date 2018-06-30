@@ -83,18 +83,18 @@ func (g *Gorm) Disconnect() error {
 	g.db = nil
 	g.reconnecting = false
 
-	// let everyone know we've disconnected
-	g.connected = false
-	g.dispatchEvent(Event{
-		ServiceType: ServiceTypeGorm,
-		Code:        ServiceDisconnected,
-	})
-
 	// let everyone know we're unhealthy
 	g.healthy = false
 	g.dispatchEvent(Event{
 		ServiceType: ServiceTypeGorm,
 		Code:        ServiceUnhealthy,
+	})
+
+	// let everyone know we've disconnected
+	g.connected = false
+	g.dispatchEvent(Event{
+		ServiceType: ServiceTypeGorm,
+		Code:        ServiceDisconnected,
 	})
 
 	return err

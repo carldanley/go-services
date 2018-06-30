@@ -100,18 +100,18 @@ func (r *RabbitMQ) Disconnect() error {
 	r.connection = nil
 	r.reconnecting = false
 
-	// let everyone know we've disconnected
-	r.connected = false
-	r.dispatchEvent(Event{
-		ServiceType: ServiceTypeRabbitMQ,
-		Code:        ServiceDisconnected,
-	})
-
 	// let everyone know we're unhealthy
 	r.healthy = false
 	r.dispatchEvent(Event{
 		ServiceType: ServiceTypeRabbitMQ,
 		Code:        ServiceUnhealthy,
+	})
+
+	// let everyone know we've disconnected
+	r.connected = false
+	r.dispatchEvent(Event{
+		ServiceType: ServiceTypeRabbitMQ,
+		Code:        ServiceDisconnected,
 	})
 
 	return err
