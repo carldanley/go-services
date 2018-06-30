@@ -50,6 +50,21 @@ func registerGorm(factory *services.Factory) {
 	}
 }
 
+func registerNATS(factory *services.Factory) {
+	config := services.Config{
+		Host:     "127.0.0.1",
+		Port:     4222,
+		Username: "root",
+		Password: "root",
+
+		ReconnectEnabled: true,
+	}
+
+	if err := factory.Register(services.ServiceTypeNATS, config); err != nil {
+		panic(err)
+	}
+}
+
 func showEvents(event services.Event) {
 	var status string
 
@@ -79,6 +94,7 @@ func main() {
 	registerGorm(factory)
 	registerRabbitMQ(factory)
 	registerRedis(factory)
+	registerNATS(factory)
 
 	factory.Subscribe(showEvents)
 

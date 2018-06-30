@@ -9,3 +9,4 @@
 1. Redis
 1. RabbitMQ
 1. Gorm (MySQL)
+1. NATS

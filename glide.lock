@@ -1,5 +1,5 @@
-hash: ca4547b0440db3a5a5bddcf2584b52f0f788749ea3c476b97eac4ffac7c7865e
-updated: 2018-06-12T10:14:31.815536-04:00
+hash: 6beaa6cfb54d9c91ddabc621bf2237a7d0cb372c1919f80b3acf0af13061737f
+updated: 2018-06-29T19:37:58.241947-04:00
 imports:
 - name: github.com/garyburd/redigo
   version: a69d19351219b6dd56f274f96d85a7014a2ec34e
@@ -12,10 +12,17 @@ imports:
   version: 6ed508ec6a4ecb3531899a69cbc746ccf65a4166
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
+- name: github.com/nats-io/go-nats
+  version: 062418ea1c2181f52dc0f954f6204370519a868b
+  subpackages:
+  - encoders/builtin
+  - util
+- name: github.com/nats-io/nuid
+  version: 289cccf02c178dc782430d534e3c1f5b72af807f
 - name: github.com/streadway/amqp
   version: e5adc2ada8b8efff032bf61173a233d143e9318e
 - name: google.golang.org/appengine
-  version: b1f26356af11148e710935ed1ac8a7f5702c7612
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - cloudsql
 testImports: []
