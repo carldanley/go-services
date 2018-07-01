@@ -1,5 +1,5 @@
 hash: 6beaa6cfb54d9c91ddabc621bf2237a7d0cb372c1919f80b3acf0af13061737f
-updated: 2018-06-29T19:37:58.241947-04:00
+updated: 2018-07-01T17:43:47.986655-04:00
 imports:
 - name: github.com/garyburd/redigo
   version: a69d19351219b6dd56f274f96d85a7014a2ec34e
@@ -18,7 +18,7 @@ imports:
   - encoders/builtin
   - util
 - name: github.com/nats-io/nuid
-  version: 289cccf02c178dc782430d534e3c1f5b72af807f
+  version: 3e58d42c9cfe5cd9429f1a21ad8f35cd859ba829
 - name: github.com/streadway/amqp
   version: e5adc2ada8b8efff032bf61173a233d143e9318e
 - name: google.golang.org/appengine
