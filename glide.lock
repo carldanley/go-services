@@ -1,5 +1,5 @@
 hash: a3fee5dcbf07c844ba359878b5a5d2a14a13a7b2fc1602eb9ad3a79b88b42a69
-updated: 2018-07-03T16:57:40.171325-04:00
+updated: 2018-07-03T23:18:31.356804-04:00
 imports:
 - name: github.com/garyburd/redigo
   version: a69d19351219b6dd56f274f96d85a7014a2ec34e
@@ -8,6 +8,12 @@ imports:
   - redis
 - name: github.com/go-sql-driver/mysql
   version: d523deb1b23d913de5bdada721a6071e71283618
+- name: github.com/gogo/protobuf
+  version: 1adfc126b41513cc696b209667c8656ea7aac67c
+  subpackages:
+  - gogoproto
+  - proto
+  - protoc-gen-gogo/descriptor
 - name: github.com/jinzhu/gorm
   version: 6ed508ec6a4ecb3531899a69cbc746ccf65a4166
 - name: github.com/jinzhu/inflection
@@ -19,6 +25,8 @@ imports:
   - util
 - name: github.com/nats-io/go-nats-streaming
   version: e15a53f85e4932540600a16b56f6c4f65f58176f
+  subpackages:
+  - pb
 - name: github.com/nats-io/nuid
   version: 3e58d42c9cfe5cd9429f1a21ad8f35cd859ba829
 - name: github.com/streadway/amqp
