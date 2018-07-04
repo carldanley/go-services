@@ -65,6 +65,23 @@ func registerNATS(factory *services.Factory) {
 	}
 }
 
+func registerNATSStreaming(factory *services.Factory) {
+	config := services.Config{
+		Host:        "127.0.0.1",
+		Port:        4222,
+		Username:    "root",
+		Password:    "root",
+		ClusterName: "nats-streaming",
+		ClientName:  "testing",
+
+		ReconnectEnabled: true,
+	}
+
+	if err := factory.Register(services.ServiceTypeNATSStreaming, config); err != nil {
+		panic(err)
+	}
+}
+
 func showEvents(event services.Event) {
 	var status string
 
@@ -91,10 +108,11 @@ func showEvents(event services.Event) {
 func main() {
 	factory := services.NewFactory()
 
-	registerGorm(factory)
-	registerRabbitMQ(factory)
-	registerRedis(factory)
-	registerNATS(factory)
+	// registerGorm(factory)
+	// registerRabbitMQ(factory)
+	// registerRedis(factory)
+	// registerNATS(factory)
+	registerNATSStreaming(factory)
 
 	factory.Subscribe(showEvents)
 

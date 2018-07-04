@@ -31,6 +31,8 @@ func (f *Factory) Register(svcType string, config Config) error {
 		service = &Redis{}
 	case ServiceTypeNATS:
 		service = &NATS{}
+	case ServiceTypeNATSStreaming:
+		service = &NATSStreaming{}
 	default:
 		return errors.New("Unrecognized service")
 	}

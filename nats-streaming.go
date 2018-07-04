@@ -5,12 +5,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 )
 
-const ServiceTypeNATS = "nats"
+const ServiceTypeNATSStreaming = "nats-streaming"
 
-type NATS struct {
+type NATSStreaming struct {
 	Config
 
 	healthy      bool
@@ -18,14 +18,14 @@ type NATS struct {
 	reconnecting bool
 
 	eventCallbacks []EventCallback
-	connection     *nats.Conn
+	connection     stan.Conn
 }
 
-func (n *NATS) SetConfig(config Config) {
+func (n *NATSStreaming) SetConfig(config Config) {
 	n.Config = config
 }
 
-func (n *NATS) Connect() error {
+func (n *NATSStreaming) Connect() error {
 	connectionString := fmt.Sprintf(
 		"nats://%s:%s@%s:%d",
 		n.Config.Username,
@@ -39,15 +39,17 @@ func (n *NATS) Connect() error {
 		reconnectInterval = 1000
 	}
 
-	conn, err := nats.Connect(
-		connectionString,
-		nats.DisconnectHandler(n.onDisconnected),
-		nats.MaxReconnects(0),
+	conn, err := stan.Connect(
+		n.Config.ClusterName,
+		n.Config.ClientName,
+		stan.NatsURL(connectionString),
+		stan.Pings(1, 3),
+		stan.SetConnectionLostHandler(n.onDisconnected),
 	)
 
 	if err != nil {
 		n.dispatchEvent(Event{
-			ServiceType: ServiceTypeNATS,
+			ServiceType: ServiceTypeNATSStreaming,
 			Code:        ServiceCouldNotConnect,
 		})
 
@@ -60,38 +62,38 @@ func (n *NATS) Connect() error {
 	// let everyone know we've connected
 	n.connected = true
 	n.dispatchEvent(Event{
-		ServiceType: ServiceTypeNATS,
+		ServiceType: ServiceTypeNATSStreaming,
 		Code:        ServiceConnected,
 	})
 
 	// let everyone know we're healthy
 	n.healthy = true
 	n.dispatchEvent(Event{
-		ServiceType: ServiceTypeNATS,
+		ServiceType: ServiceTypeNATSStreaming,
 		Code:        ServiceHealthy,
 	})
 
 	return nil
 }
 
-func (n *NATS) dispatchEvent(event Event) {
+func (n *NATSStreaming) dispatchEvent(event Event) {
 	for _, callback := range n.eventCallbacks {
 		callback(event)
 	}
 }
 
-func (n *NATS) onDisconnected(nc *nats.Conn) {
+func (n *NATSStreaming) onDisconnected(_ stan.Conn, reason error) {
 	// let everyone know we're unhealthy
 	n.healthy = false
 	n.dispatchEvent(Event{
-		ServiceType: ServiceTypeNATS,
+		ServiceType: ServiceTypeNATSStreaming,
 		Code:        ServiceUnhealthy,
 	})
 
 	// let everyone know we've disconnected
 	n.connected = false
 	n.dispatchEvent(Event{
-		ServiceType: ServiceTypeNATS,
+		ServiceType: ServiceTypeNATSStreaming,
 		Code:        ServiceDisconnected,
 	})
 
@@ -100,7 +102,7 @@ func (n *NATS) onDisconnected(nc *nats.Conn) {
 	}
 }
 
-func (n *NATS) tryToReconnect() {
+func (n *NATSStreaming) tryToReconnect() {
 	if n.IsReconnecting() {
 		return
 	}
@@ -108,7 +110,7 @@ func (n *NATS) tryToReconnect() {
 	// let everyone know we're reconnecting
 	n.reconnecting = true
 	n.dispatchEvent(Event{
-		ServiceType: ServiceTypeNATS,
+		ServiceType: ServiceTypeNATSStreaming,
 		Code:        ServiceReconnecting,
 	})
 
@@ -142,7 +144,7 @@ func (n *NATS) tryToReconnect() {
 	}
 }
 
-func (n *NATS) Disconnect() error {
+func (n *NATSStreaming) Disconnect() error {
 	if n.connection == nil {
 		return nil
 	}
@@ -157,15 +159,15 @@ func (n *NATS) Disconnect() error {
 	return nil
 }
 
-func (n *NATS) GetClient() interface{} {
+func (n *NATSStreaming) GetClient() interface{} {
 	return n.connection
 }
 
-func (n *NATS) Subscribe(callback EventCallback) {
+func (n *NATSStreaming) Subscribe(callback EventCallback) {
 	n.eventCallbacks = append(n.eventCallbacks, callback)
 }
 
-func (n *NATS) Unsubscribe(callback EventCallback) {
+func (n *NATSStreaming) Unsubscribe(callback EventCallback) {
 	callbacks := []EventCallback{}
 	f1 := reflect.ValueOf(callback)
 	p1 := f1.Pointer()
@@ -184,14 +186,14 @@ func (n *NATS) Unsubscribe(callback EventCallback) {
 	n.eventCallbacks = callbacks
 }
 
-func (n *NATS) IsHealthy() bool {
+func (n *NATSStreaming) IsHealthy() bool {
 	return n.healthy
 }
 
-func (n *NATS) IsConnected() bool {
+func (n *NATSStreaming) IsConnected() bool {
 	return n.connected
 }
 
-func (n *NATS) IsReconnecting() bool {
+func (n *NATSStreaming) IsReconnecting() bool {
 	return n.reconnecting
 }

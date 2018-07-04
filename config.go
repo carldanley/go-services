@@ -1,11 +1,13 @@
 package services
 
 type Config struct {
-	Host     string
-	Port     uint32
-	Username string
-	Password string
-	Database string
+	Host        string
+	Port        uint32
+	Username    string
+	Password    string
+	Database    string
+	ClusterName string
+	ClientName  string
 
 	MonitorIntervalMilliseconds int
 
