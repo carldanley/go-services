@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+const Version = "1.0.0"
+
 type Factory struct {
 	events             EventStream
 	registeredServices map[string]Service
