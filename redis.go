@@ -13,9 +13,10 @@ const ServiceTypeRedis = "redis"
 type Redis struct {
 	Config
 
-	healthy      bool
-	connected    bool
-	reconnecting bool
+	healthy         bool
+	connected       bool
+	reconnecting    bool
+	shouldReconnect bool
 
 	eventCallbacks []EventCallback
 	connection     redis.Conn
@@ -23,6 +24,7 @@ type Redis struct {
 
 func (r *Redis) SetConfig(config Config) {
 	r.Config = config
+	r.shouldReconnect = config.ReconnectEnabled
 }
 
 func (r *Redis) Connect() error {
@@ -43,6 +45,9 @@ func (r *Redis) Connect() error {
 
 	// cache the connection
 	r.connection = connection
+
+	// reset the value of `shouldReconnect` back to what the configuration states
+	r.shouldReconnect = r.Config.ReconnectEnabled
 
 	// let everyone know we've connected
 	r.connected = true
@@ -65,6 +70,10 @@ func (r *Redis) Connect() error {
 }
 
 func (r *Redis) Disconnect() error {
+	// stop any reconnections from happening
+	r.shouldReconnect = false
+
+	// make sure we had an active connection
 	if r.connection == nil {
 		return nil
 	}
@@ -143,13 +152,6 @@ func (r *Redis) monitorConnection() {
 		return
 	}
 
-	interval := r.Config.MonitorIntervalMilliseconds
-	if interval == 0 {
-		interval = 1000
-	}
-
-	time.Sleep(time.Millisecond * time.Duration(interval))
-
 	if _, err := r.connection.Do("PING"); err != nil {
 		// first disconnect
 		r.Disconnect()
@@ -157,12 +159,19 @@ func (r *Redis) monitorConnection() {
 		// begin trying to reconnect
 		go r.tryToReconnect()
 	} else {
+		interval := r.Config.MonitorIntervalMilliseconds
+		if interval == 0 {
+			interval = 1000
+		}
+
+		time.Sleep(time.Millisecond * time.Duration(interval))
+
 		go r.monitorConnection()
 	}
 }
 
 func (r *Redis) tryToReconnect() {
-	if r.IsReconnecting() {
+	if !r.shouldReconnect || r.IsReconnecting() {
 		return
 	}
 

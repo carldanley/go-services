@@ -14,9 +14,10 @@ const ServiceTypeGorm = "gorm"
 type Gorm struct {
 	Config
 
-	healthy      bool
-	connected    bool
-	reconnecting bool
+	healthy         bool
+	connected       bool
+	reconnecting    bool
+	shouldReconnect bool
 
 	eventCallbacks []EventCallback
 
@@ -25,6 +26,7 @@ type Gorm struct {
 
 func (g *Gorm) SetConfig(config Config) {
 	g.Config = config
+	g.shouldReconnect = config.ReconnectEnabled
 }
 
 func (g *Gorm) Connect() error {
@@ -50,6 +52,9 @@ func (g *Gorm) Connect() error {
 	// cache the gorm database
 	g.db = db
 
+	// reset the value of `shouldReconnect` back to what the configuration states
+	g.shouldReconnect = g.Config.ReconnectEnabled
+
 	// let everyone know we've connected
 	g.connected = true
 	g.dispatchEvent(Event{
@@ -71,6 +76,10 @@ func (g *Gorm) Connect() error {
 }
 
 func (g *Gorm) Disconnect() error {
+	// stop any reconnections from happening
+	g.shouldReconnect = false
+
+	// make sure we had an active connection
 	if g.db == nil {
 		return nil
 	}
@@ -149,26 +158,31 @@ func (g *Gorm) monitorConnection() {
 		return
 	}
 
-	interval := g.Config.MonitorIntervalMilliseconds
-	if interval == 0 {
-		interval = 1000
-	}
-
-	time.Sleep(time.Millisecond * time.Duration(interval))
-
 	if _, err := g.db.DB().Exec("DO 1;"); err != nil {
 		// first, disconnect
 		g.Disconnect()
 
+		// since it wasn't a forced disconnect, put `shouldReconnect` back
+		g.shouldReconnect = g.Config.ReconnectEnabled
+
 		// begin trying to reconnect
 		go g.tryToReconnect()
 	} else {
+		interval := g.Config.MonitorIntervalMilliseconds
+		if interval == 0 {
+			interval = 1000
+		}
+
+		// sleep for some time before trying to monitor the connection again
+		time.Sleep(time.Millisecond * time.Duration(interval))
+
+		// continue monitoring the connection
 		go g.monitorConnection()
 	}
 }
 
 func (g *Gorm) tryToReconnect() {
-	if g.IsReconnecting() {
+	if !g.shouldReconnect || g.IsReconnecting() {
 		return
 	}
 
@@ -197,8 +211,7 @@ func (g *Gorm) tryToReconnect() {
 
 	successful := callback(g)
 
-	// if we weren't successful, attempt to reschedule things
-	if !successful && g.Config.ReconnectEnabled {
+	if !successful {
 		// calculate when to start the next reconnect
 		interval := g.Config.ReconnectIntervalMilliseconds
 		if interval == 0 {

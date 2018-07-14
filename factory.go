@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"reflect"
+	"sync"
 )
 
 type Factory struct {
@@ -89,11 +90,27 @@ func (f *Factory) Connect() error {
 	return nil
 }
 
-func (f *Factory) Disconnect() error {
+func (f *Factory) Disconnect() []error {
+	var wg sync.WaitGroup
+
+	errors := []error{}
+
 	for _, service := range f.registeredServices {
-		if err := service.Disconnect(); err != nil {
-			return err
-		}
+		wg.Add(1)
+
+		go func(svc Service) {
+			if err := svc.Disconnect(); err != nil {
+				errors = append(errors, err)
+			}
+
+			wg.Done()
+		}(service)
+	}
+
+	wg.Wait()
+
+	if len(errors) > 0 {
+		return errors
 	}
 
 	return nil

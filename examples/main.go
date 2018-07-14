@@ -2,9 +2,16 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/carldanley/go-services"
 )
+
+var factory *services.Factory
+var signalChannel chan os.Signal
 
 func registerRedis(factory *services.Factory) {
 	config := services.Config{
@@ -69,9 +76,9 @@ func registerNATSStreaming(factory *services.Factory) {
 	config := services.Config{
 		Host:        "127.0.0.1",
 		Port:        4222,
-		Username:    "root",
-		Password:    "root",
-		ClusterName: "nats-streaming",
+		Username:    "",
+		Password:    "",
+		ClusterName: "radium",
 		ClientName:  "testing",
 
 		ReconnectEnabled: true,
@@ -105,12 +112,26 @@ func showEvents(event services.Event) {
 	fmt.Printf("[%s]: %s\n", event.ServiceType, status)
 }
 
-func main() {
-	factory := services.NewFactory()
+func catchSignals() {
+	for range signalChannel {
+		fmt.Println("disconnecting from servers...")
+		factory.Disconnect()
+		fmt.Println("final destination fired")
+		time.Sleep(time.Second * 1)
+		os.Exit(1)
+	}
+}
 
-	// registerGorm(factory)
-	// registerRabbitMQ(factory)
-	// registerRedis(factory)
+func main() {
+	signalChannel = make(chan os.Signal)
+	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+	go catchSignals()
+
+	factory = services.NewFactory()
+
+	registerGorm(factory)
+	registerRabbitMQ(factory)
+	registerRedis(factory)
 	// registerNATS(factory)
 	registerNATSStreaming(factory)
 

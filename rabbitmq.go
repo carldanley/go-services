@@ -13,9 +13,10 @@ const ServiceTypeRabbitMQ = "rabbitmq"
 type RabbitMQ struct {
 	Config
 
-	healthy      bool
-	connected    bool
-	reconnecting bool
+	healthy         bool
+	connected       bool
+	reconnecting    bool
+	shouldReconnect bool
 
 	connectionEvents chan *amqp.Error
 
@@ -25,6 +26,7 @@ type RabbitMQ struct {
 
 func (r *RabbitMQ) SetConfig(config Config) {
 	r.Config = config
+	r.shouldReconnect = config.ReconnectEnabled
 }
 
 func (r *RabbitMQ) Connect() error {
@@ -54,6 +56,9 @@ func (r *RabbitMQ) Connect() error {
 
 	// cache the connection for later
 	r.connection = connection
+
+	// reset the value of `shouldReconnect` back to what the configuration states
+	r.shouldReconnect = r.Config.ReconnectEnabled
 
 	// make sure we have a way to process connection-related events
 	// cleanup the channels
@@ -87,6 +92,9 @@ func (r *RabbitMQ) Connect() error {
 }
 
 func (r *RabbitMQ) Disconnect() error {
+	// stop any reconnections from happening
+	r.shouldReconnect = false
+
 	// skip doing work if we don't have a connection
 	if r.connection == nil {
 		return nil
@@ -163,6 +171,9 @@ func (r *RabbitMQ) processConnectionEvents() {
 		// first, disconnect from existing connections
 		r.Disconnect()
 
+		// since it wasn't a forced disconnect, put `shouldReconnect` back
+		r.shouldReconnect = r.Config.ReconnectEnabled
+
 		// begin trying to reconnect
 		go r.tryToReconnect()
 	}
@@ -175,7 +186,7 @@ func (r *RabbitMQ) dispatchEvent(event Event) {
 }
 
 func (r *RabbitMQ) tryToReconnect() {
-	if r.IsReconnecting() {
+	if !r.shouldReconnect || r.IsReconnecting() {
 		return
 	}
 
@@ -201,7 +212,7 @@ func (r *RabbitMQ) tryToReconnect() {
 	successful := callback(r)
 
 	// if we weren't successful, attempt to reschedule things
-	if !successful && r.Config.ReconnectEnabled {
+	if !successful {
 		// calculate when to start the next reconnect
 		interval := r.Config.ReconnectIntervalMilliseconds
 		if interval == 0 {

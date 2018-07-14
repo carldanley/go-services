@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -13,9 +14,10 @@ const ServiceTypeNATSStreaming = "nats-streaming"
 type NATSStreaming struct {
 	Config
 
-	healthy      bool
-	connected    bool
-	reconnecting bool
+	healthy         bool
+	connected       bool
+	reconnecting    bool
+	shouldReconnect bool
 
 	eventCallbacks []EventCallback
 	connection     stan.Conn
@@ -23,6 +25,7 @@ type NATSStreaming struct {
 
 func (n *NATSStreaming) SetConfig(config Config) {
 	n.Config = config
+	n.shouldReconnect = config.ReconnectEnabled
 }
 
 func (n *NATSStreaming) Connect() error {
@@ -33,11 +36,6 @@ func (n *NATSStreaming) Connect() error {
 		n.Config.Host,
 		n.Config.Port,
 	)
-
-	reconnectInterval := n.Config.ReconnectIntervalMilliseconds
-	if reconnectInterval == 0 {
-		reconnectInterval = 1000
-	}
 
 	conn, err := stan.Connect(
 		n.Config.ClusterName,
@@ -58,6 +56,9 @@ func (n *NATSStreaming) Connect() error {
 
 	// cache the nats connection
 	n.connection = conn
+
+	// reset the value of `shouldReconnect` back to what the configuration states
+	n.shouldReconnect = n.Config.ReconnectEnabled
 
 	// let everyone know we've connected
 	n.connected = true
@@ -97,13 +98,11 @@ func (n *NATSStreaming) onDisconnected(_ stan.Conn, reason error) {
 		Code:        ServiceDisconnected,
 	})
 
-	if n.Config.ReconnectEnabled {
-		go n.tryToReconnect()
-	}
+	go n.tryToReconnect()
 }
 
 func (n *NATSStreaming) tryToReconnect() {
-	if n.IsReconnecting() {
+	if !n.shouldReconnect || n.IsReconnecting() {
 		return
 	}
 
@@ -129,7 +128,7 @@ func (n *NATSStreaming) tryToReconnect() {
 	successful := callback(n)
 
 	// if we weren't successful, attempt to reschedule things
-	if !successful && n.Config.ReconnectEnabled {
+	if !successful {
 		// calculate when to start the next reconnect
 		interval := n.Config.ReconnectIntervalMilliseconds
 		if interval == 0 {
@@ -145,18 +144,25 @@ func (n *NATSStreaming) tryToReconnect() {
 }
 
 func (n *NATSStreaming) Disconnect() error {
+	// stop any reconnections from happening
+	n.shouldReconnect = false
+
+	// make sure we had an active connection
 	if n.connection == nil {
 		return nil
 	}
 
 	// close the connection
-	n.connection.Close()
+	err := n.connection.Close()
 
 	// reset some variables
 	n.connection = nil
 	n.reconnecting = false
 
-	return nil
+	// fire off an `onDisconnected` event
+	n.onDisconnected(nil, errors.New("forced disconnect"))
+
+	return err
 }
 
 func (n *NATSStreaming) GetClient() interface{} {
