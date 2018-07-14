@@ -10,3 +10,4 @@
 1. RabbitMQ
 1. Gorm (MySQL)
 1. NATS
+1. NATS-streaming
