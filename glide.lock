@@ -1,5 +1,5 @@
-hash: a3fee5dcbf07c844ba359878b5a5d2a14a13a7b2fc1602eb9ad3a79b88b42a69
-updated: 2018-07-03T23:18:31.356804-04:00
+hash: fce46e448f94f6236949703acef0d08bb819649fc0d1694e6d51077fe3c654ba
+updated: 2018-07-14T17:02:52.839872-04:00
 imports:
 - name: github.com/garyburd/redigo
   version: a69d19351219b6dd56f274f96d85a7014a2ec34e
@@ -9,7 +9,7 @@ imports:
 - name: github.com/go-sql-driver/mysql
   version: d523deb1b23d913de5bdada721a6071e71283618
 - name: github.com/gogo/protobuf
-  version: 1adfc126b41513cc696b209667c8656ea7aac67c
+  version: 30cf7ac33676b5786e78c746683f0d4cd64fa75b
   subpackages:
   - gogoproto
   - proto
@@ -17,7 +17,7 @@ imports:
 - name: github.com/jinzhu/gorm
   version: 6ed508ec6a4ecb3531899a69cbc746ccf65a4166
 - name: github.com/jinzhu/inflection
-  version: 1c35d901db3da928c72a72d8458480cc9ade058f
+  version: 04140366298a54a039076d798123ffa108fff46c
 - name: github.com/nats-io/go-nats
   version: 062418ea1c2181f52dc0f954f6204370519a868b
   subpackages:
@@ -32,7 +32,7 @@ imports:
 - name: github.com/streadway/amqp
   version: e5adc2ada8b8efff032bf61173a233d143e9318e
 - name: google.golang.org/appengine
-  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
+  version: b1f26356af11148e710935ed1ac8a7f5702c7612
   subpackages:
   - cloudsql
 testImports: []
