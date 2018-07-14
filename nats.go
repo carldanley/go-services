@@ -13,9 +13,10 @@ const ServiceTypeNATS = "nats"
 type NATS struct {
 	Config
 
-	healthy      bool
-	connected    bool
-	reconnecting bool
+	healthy         bool
+	connected       bool
+	reconnecting    bool
+	shouldReconnect bool
 
 	eventCallbacks []EventCallback
 	connection     *nats.Conn
@@ -23,6 +24,7 @@ type NATS struct {
 
 func (n *NATS) SetConfig(config Config) {
 	n.Config = config
+	n.shouldReconnect = config.ReconnectEnabled
 }
 
 func (n *NATS) Connect() error {
@@ -33,11 +35,6 @@ func (n *NATS) Connect() error {
 		n.Config.Host,
 		n.Config.Port,
 	)
-
-	reconnectInterval := n.Config.ReconnectIntervalMilliseconds
-	if reconnectInterval == 0 {
-		reconnectInterval = 1000
-	}
 
 	conn, err := nats.Connect(
 		connectionString,
@@ -56,6 +53,9 @@ func (n *NATS) Connect() error {
 
 	// cache the nats connection
 	n.connection = conn
+
+	// reset the value of `shouldReconnect` back to what the configuration states
+	n.shouldReconnect = n.Config.ReconnectEnabled
 
 	// let everyone know we've connected
 	n.connected = true
@@ -95,13 +95,11 @@ func (n *NATS) onDisconnected(nc *nats.Conn) {
 		Code:        ServiceDisconnected,
 	})
 
-	if n.Config.ReconnectEnabled {
-		go n.tryToReconnect()
-	}
+	go n.tryToReconnect()
 }
 
 func (n *NATS) tryToReconnect() {
-	if n.IsReconnecting() {
+	if !n.shouldReconnect || n.IsReconnecting() {
 		return
 	}
 
@@ -143,6 +141,10 @@ func (n *NATS) tryToReconnect() {
 }
 
 func (n *NATS) Disconnect() error {
+	// stop any reconnections from happening
+	n.shouldReconnect = false
+
+	// make sure we had an active connection
 	if n.connection == nil {
 		return nil
 	}

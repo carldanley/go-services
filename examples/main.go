@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/carldanley/go-services"
 )
@@ -61,8 +60,8 @@ func registerNATS(factory *services.Factory) {
 	config := services.Config{
 		Host:     "127.0.0.1",
 		Port:     4222,
-		Username: "root",
-		Password: "root",
+		Username: "",
+		Password: "",
 
 		ReconnectEnabled: true,
 	}
@@ -78,7 +77,7 @@ func registerNATSStreaming(factory *services.Factory) {
 		Port:        4222,
 		Username:    "",
 		Password:    "",
-		ClusterName: "radium",
+		ClusterName: "nats-cluster",
 		ClientName:  "testing",
 
 		ReconnectEnabled: true,
@@ -117,7 +116,6 @@ func catchSignals() {
 		fmt.Println("disconnecting from servers...")
 		factory.Disconnect()
 		fmt.Println("final destination fired")
-		time.Sleep(time.Second * 1)
 		os.Exit(1)
 	}
 }
@@ -132,7 +130,7 @@ func main() {
 	registerGorm(factory)
 	registerRabbitMQ(factory)
 	registerRedis(factory)
-	// registerNATS(factory)
+	registerNATS(factory)
 	registerNATSStreaming(factory)
 
 	factory.Subscribe(showEvents)
@@ -143,6 +141,5 @@ func main() {
 
 	defer factory.Disconnect()
 
-	// todo: remove this function
 	<-factory.GetEventStream()
 }
