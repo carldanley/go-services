@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/nats-io/go-nats"
+	nats "github.com/nats-io/go-nats"
 )
 
 const ServiceTypeNATS = "nats"
