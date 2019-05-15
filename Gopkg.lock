@@ -33,12 +33,12 @@
   version = "v1.2.1"
 
 [[projects]]
-  digest = "1:d4e6e8584d0a94ce567d237e19192dae44d57d2767ac7e1d7fbf5626d176381a"
+  digest = "1:0a00b2537beacde5f2f5ebec11684f8e98fb23c2ed798a948461d82356dc7491"
   name = "github.com/jinzhu/gorm"
   packages = ["."]
   pruneopts = "UT"
-  revision = "472c70caa40267cb89fd8facb07fe6454b578626"
-  version = "v1.9.2"
+  revision = "b7156195f7f3415f97c20abbd6aff894b847fee8"
+  version = "v1.9.8"
 
 [[projects]]
   branch = "master"
@@ -61,15 +61,15 @@
   version = "v1.7.2"
 
 [[projects]]
-  digest = "1:c360a024d7b54bef58e344d9dc29f8c76b3f8be1216a92a0ac2aee3ee37f09f1"
+  digest = "1:25a0458641a719a972fa7850c900aaae6b12e74efa6fe35c9bd7a772543bc635"
   name = "github.com/nats-io/go-nats-streaming"
   packages = [
     ".",
     "pb",
   ]
   pruneopts = "UT"
-  revision = "4366d43a0648b4997ed32080f937e8702ab86c48"
-  version = "v0.4.2"
+  revision = "7cd94c239033c0405a43454be55a0810d3a3ca89"
+  version = "v0.4.4"
 
 [[projects]]
   digest = "1:0b5d91120efc54504bc253fda90b08c4be88cd78a4023ef60019e95bb0cdc136"
@@ -80,23 +80,20 @@
   version = "v0.0.2"
 
 [[projects]]
-  digest = "1:c3cd663f2f30b92536b9f290ac85c6310dae36a14cb8961553ae9ccf0d85ae41"
+  digest = "1:599f3202ce0a754144ddc4be4c6df9c6ab27b1d722a63ede6b2e0c3a2cc338a8"
   name = "github.com/nats-io/nuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "289cccf02c178dc782430d534e3c1f5b72af807f"
-  version = "v1.0.0"
+  revision = "4b96681fa6d28dd0ab5fe79bac63b3a493d9ee94"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:7ab9394e38507ed6c39d8843c40152198689e6ce81235a761784fdd7bfa29f37"
+  digest = "1:d6bb6f3240a488ffe5bb6952b513569d009927dcb20ff94885f87b76cef2b698"
   name = "github.com/streadway/amqp"
-  packages = [
-    ".",
-    "internal/proto",
-  ]
+  packages = ["."]
   pruneopts = "UT"
-  revision = "16ed540749f64417a42006ad795b01c0f5d4677a"
+  revision = "75d898a42a940fbc854dfd1a4199eabdc00cf024"
 
 [[projects]]
   branch = "master"
@@ -107,15 +104,15 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
+  revision = "22d7a77e9e5f409e934ed268692e56707cd169e5"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
   name = "google.golang.org/appengine"
   packages = ["cloudsql"]
   pruneopts = "UT"
-  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
-  version = "v1.5.0"
+  revision = "4c25cacc810c02874000e4f7071286a8e96b2515"
+  version = "v1.6.0"
 
 [solve-meta]
   analyzer-name = "dep"
